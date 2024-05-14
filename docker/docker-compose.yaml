@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  bot:
+    image: bot
+    container_name: bot
+    env_file:
+      - '.env'
+    networks:
+      - ilona_net
+    depends_on:
+      - db
+
+  db:
+    image: db
+    container_name: db
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - '.env'
+    networks:
+      - ilona_net
+
+  db_repl:
+    image: db_repl
+    container_name: db_repl
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - '.env'
+    networks:
+      - ilona_net
+    depends_on:
+      - db
+
+networks:
+  ilona_net:
+    driver: bridge
