@@ -365,7 +365,7 @@ def get_services(update: Update, context):
 
 #Сбор информации о логах постргрес
 def get_repl_logs (update: Update, context):
-    update.message.reply_text(sshConnectMaster('cat /var/log/postgresql/postgresql-15-main.log | grep repl_user | tail -n20'))
+    update.message.reply_text(sshConnectMaster('cat /var/log/postgresql/postgresql-14-main.log | grep repl_user | tail -n20'))
     return ConversationHandler.END
 #lINUX
 
