@@ -1,0 +1,28 @@
+all:
+  vars:
+    DB_REPL_USER: repl_user
+    DB_REPL_PASSWORD: 
+    POSTGRES_VERSION: 14
+    DB_HOST: 192.168.1.110
+  hosts:
+    host01:
+      ansible_host: 192.168.1.110
+      ansible_user: ansible
+      ansible_ssh_pass: 
+      github_repo: https://github.com/lonai/talking_to_the_moon
+      dir: /home/user/ansible
+      TOKEN: 
+      RM_HOST: 192.168.1.110
+      RM_PORT: 22
+      RM_USER: user #имеется в виду с правами root
+      RM_PASSWORD: 
+      DB_USER: postgres
+      DB_PASSWORD: 
+      DB_PORT: 5432
+      DB_DATABASE: bot_db
+      DB_REPL_HOST: db_repl
+      DB_REPL_PORT: 5432
+    host02:
+      ansible_host: 192.168.1.109
+      ansible_user: ansible
+      ansible_ssh_pass: 
