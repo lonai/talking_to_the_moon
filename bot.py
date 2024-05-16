@@ -13,12 +13,8 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, Conve
 
 KEY = 1
 
-dotenv_path = Path('.env')
-load_dotenv(dotenv_path=dotenv_path)
+TOKEN = os.getenv('TOKEN')
 
-token = os.getenv('TOKEN')
-
-connection = None
 #keys for bot
 host = os.getenv('RM_HOST')
 port = os.getenv('RM_PORT')
@@ -31,11 +27,7 @@ port_db = os.getenv('DB_PORT')
 username_db = os.getenv('DB_USER')
 password_db = os.getenv('DB_PASSWORD')
 database = os.getenv('DB_DATABASE')
-#keys for repl
-host_repl_db = os.getenv('DB_REPL_HOST')
-port_repl_db = os.getenv('DB_REPL_PORT')
-user_repl_db = os.getenv('DB_REPL_USER')
-password_repl_db = os.getenv('DB_REPL_PASSWORD')
+
 
 # Подключаем логирование
 logging.basicConfig(
@@ -94,6 +86,16 @@ def ssh_connect(command):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect(hostname=host, username=username, password=password, port=port)
+    stdin, stdout, stderr = client.exec_command(command)
+    data = stdout.read() + stderr.read()
+    client.close()
+    data = str(data).replace('\\n', '\n').replace('\\t', '\t')[2:-1]
+    return data
+
+def sshConnectMaster(command):
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(hostname=host_db, username=username, password=password, port=port)
     stdin, stdout, stderr = client.exec_command(command)
     data = stdout.read() + stderr.read()
     client.close()
@@ -363,27 +365,12 @@ def get_services(update: Update, context):
 
 #Сбор информации о логах постргрес
 def get_repl_logs (update: Update, context):
-    connection = psycopg2.connect( host=host_db, port=port_db, database=database, user=username_db, password=password_db )
-    cursor = connection.cursor()
-    data = cursor.execute("SELECT pg_read_file(pg_current_logfile());")
-    data = cursor.fetchall()
-    data = str(data).replace('\\n', '\n').replace('\\t', '\t')[2:-1]
-    answer = 'А вот и они, ты справился, мы в тебя верили.:\n'
-
-    for str1 in data.split('\n'):
-        if user_repl_db in str1:
-            answer += str1 + '\n'
-    if len(answer) == 17:
-        answer = 'Бро, а какие данные то? Ничего не было, воспользуйся сначала командой поиска email, запиши его в бд и попробуй снова!!'
-    for x in range(0, len(answer), 4096):
-        update.message.reply_text(answer[x:x+4096])
-
     update.message.reply_text(sshConnectMaster('cat /var/log/postgresql/postgresql-15-main.log | grep repl_user | tail -n20'))
     return ConversationHandler.END
 #lINUX
 
 def main():
-    updater = Updater(token, use_context=True)
+    updater = Updater(TOKEN, use_context=True)
 
     # Получаем диспетчер для регистрации обработчиков
     dp = updater.dispatcher
